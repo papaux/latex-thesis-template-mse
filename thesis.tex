@@ -1,0 +1,79 @@
+\newcommand{\msepath}{./mse-template}
+\newcommand{\figpath}{./04_figs/}
+
+\documentclass[
+   % template options
+   major=tic,
+   type=thesis,
+   confidential=false,
+   lang=en,
+   path=\msepath,
+   skipbla=false,
+   draftversion=false,
+   % report options
+   twoside
+]{\msepath/mse-thesis}
+
+ 
+\addbibresource{03_bib/bibliography.bib}
+
+% get document variables
+\input{thesis-vars}
+
+% listing config
+\input{listing-config}
+
+% acronyms and glossaries
+\input{05_glossaries/glossaries}
+\input{05_glossaries/acronyms}
+
+\begin{document}
+
+   % Preamble #################################################################
+
+
+   \pagenumbering{roman}
+
+   \clearemptydoublepage \input{01_chapters/00_abstract}
+   \clearemptydoublepage \input{01_chapters/01_acknowledgments}
+
+   % Table of Contents ########################################################
+
+   % reset paragraph spacing for toc
+   \clearemptydoublepage \inserttoc
+ 
+ 
+ 
+
+   % Chapters #################################################################
+
+   % set paragraph spacing
+   \setlength{\parskip}{2.0ex plus0.5ex minus0.2ex}
+
+   \pagenumbering{arabic}
+   
+   \clearemptydoublepage \input{01_chapters/10_chapter} 
+   \clearemptydoublepage \input{01_chapters/20_chapter}
+   \clearemptydoublepage \input{01_chapters/30_chapter}
+   \clearemptydoublepage \input{01_chapters/40_chapter}
+   \clearemptydoublepage \input{01_chapters/50_chapter}
+   \clearemptydoublepage \input{01_chapters/60_chapter}
+            
+
+   % Bibliography & Lists #####################################################
+
+   \clearemptydoublepage \insertbibliography
+   
+   \clearemptydoublepage \insertlof
+   \clearemptydoublepage \insertlot
+   \clearemptydoublepage \insertlol
+   
+   \clearemptydoublepage \insertglossaries
+
+   % Appendix #################################################################
+
+   \begin{appendix}
+      \input{02_appendices/appendices-inc}
+   \end{appendix}
+
+\end{document}

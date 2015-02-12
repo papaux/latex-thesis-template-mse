@@ -1,0 +1,30 @@
+\chapter{Demo chapter} \label{chap:demo}
+
+
+Some code snippets example in \Cref{lst:example}.
+
+\begin{lstlisting}[language=xml,label={lst:example},caption={Console device configuration in libvirt XML.},float=!ht]
+<serial type='pty'>
+  <target port='0'/>
+</serial>
+<console type='pty'>
+  <target type='serial' port='0'/>
+</console>
+\end{lstlisting}
+
+
+Some picture in \Cref{fig:example}
+
+\begin{figure}[H]
+  \begin{center}
+    \includegraphics[scale=0.55]{\figpath 30_demo}
+    \caption{Demo picture.}
+    \label{fig:example}
+  \end{center}
+\end{figure}
+
+
+Some glossary item \gls{hypercall} and an acronym \gls{lpae}.
+
+
+And one bibliography entry reference here \cite{Popek1974} .
