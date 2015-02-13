@@ -1,6 +1,6 @@
 \NeedsTeXFormat{LaTeX2e}
 \newcommand{\mse@classversion}{2.0}
-\ProvidesPackage{./template-latex/mse-thesis}[2013/09/17 MSE Template LaTex, \mse@classversion]
+\ProvidesPackage{./mse-template/mse-thesis}[2013/09/17 MSE Template LaTex, \mse@classversion]
 
 % Options Definitions ######################################################
 
@@ -15,6 +15,7 @@
 \DeclareStringOption{path}
 \DeclareBoolOption[false]{confidential}
 \DeclareBoolOption[false]{skipbla}
+\DeclareBoolOption[false]{draftversion}
 
 \DeclareDefaultOption{
 	\PassOptionsToClass{\CurrentOption}{report}
@@ -27,19 +28,60 @@
 % Options Processing #######################################################
 
 \RequirePackage[T1]{fontenc}
-\RequirePackage{pgfgantt}
+%\RequirePackage{pgfgantt}
 \RequirePackage[utf8]{inputenc}
-\RequirePackage[a4paper]{geometry}
-\RequirePackage{pdflscape}
-\RequirePackage{hyperref}
+\RequirePackage[a4paper]{geometry} % geometry package makes texttt not breaking lines...
+\RequirePackage{pdflscape}         % modify orientation of some pages
 \RequirePackage{xspace}
 \RequirePackage{graphicx}
 \RequirePackage{anysize}
+\RequirePackage[hyphens]{url}      % for the \path command, which breaks lines. Hyphen option allows to break after -
 \RequirePackage{fancyhdr}
-\RequirePackage{listings}
 \RequirePackage[style=ieee, backend=biber]{biblatex}
 \RequirePackage{csquotes}
 \RequirePackage{setspace}
+\RequirePackage{booktabs}          % for midrule, bottomrule
+\RequirePackage{tabularx}          % more powerful tabular env
+\RequirePackage{enumitem}          % allows parsep customization
+\RequirePackage{float}             % to place figure exactly where code is
+%\RequirePackage[section]{placeins} % force floating figures to appear in related section
+\RequirePackage[toc]{glossaries}   % package for glossaries / acronyms
+\RequirePackage[margin=1cm]{caption} % customize caption
+\RequirePackage{soul}              % strike text
+\RequirePackage{placeins}          % adds the floatbarrier command
+
+
+% Special quotes 
+% (have to be included before todonotes => dependency on xcolor)
+\input{\mse@option@path/mse-thesis-quotes}
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%% draft and redaction helpers
+\ifmse@option@draftversion
+  \newcommand{\td}[1]{\todo[inline]{#1}}
+  %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+  %%%%%% draft and redaction helpers
+  \RequirePackage{todonotes}
+  \RequirePackage[color,notref,notcite]{showkeys} %\[notref,notcite]
+  \definecolor{refkey}{gray}{.45}
+  \definecolor{labelkey}{gray}{.45}
+  %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\else
+  \newcommand{\todo}{}
+  \newcommand{\td}[1]{}
+  \newcommand{\missingfigure}{}
+\fi
+
+\RequirePackage{upquote}           % to get normal single quotes in listings
+\RequirePackage{listings}
+
+%%%% (almost) LAST PACKAGE TO INCLUDE
+\RequirePackage{hyperref}          % create hyperlinks in document
+%%%%
+
+% after hyperref
+\RequirePackage{cleveref}
 
 \ifnum\pdf@strcmp{\mse@option@lang}{fr}=0
 	\RequirePackage[frenchb]{babel}
@@ -61,110 +103,83 @@
 	\newcommand{\mse@major}{\mse@str@tin}
 \fi
 
+
+
 % Commands Definitions #####################################################
 
-\renewcommand{\and}{\\\vspace{0.5em}}
-\newcommand{\email}[1]{\\{\texttt{#1}}}
-\newcommand{\institute}[1]{\unskip, \emph{#1}}
-
-\newcommand{\mse@author}{\@empty}
-\renewcommand{\author}[1]{
-   \renewcommand{\mse@author}{#1}
-}
-\newcommand{\mse@contact}{\@empty}
-\newcommand{\contact}[1]{
-   \renewcommand{\mse@contact}{{\texttt{#1}}}
-}
-
-\newcommand{\mse@professor}{\@empty}
-\newcommand{\professor}[1]{
-   \renewcommand{\mse@professor}{#1}
-}
-
-\newcommand{\mse@supervisor}{\@empty}
-\newcommand{\supervisor}[1]{
-   \renewcommand{\mse@supervisor}{#1}
-}
-
-\newcommand{\mse@expert}{\@empty}
-\newcommand{\expert}[1]{
-   \renewcommand{\mse@expert}{#1}
-}
-
-\newcommand{\mse@proposedby}{\@empty}
-\newcommand{\proposedby}[1]{
-   \renewcommand{\mse@proposedby}{#1}
-}
-
-\newcommand\mse@version{\@empty}
-\newcommand{\version}[1]{
-   \renewcommand{\mse@version}{#1}
-}
-
-\newcommand\mse@headofmse{\@empty}
-\newcommand{\headofmse}[1]{
-   \renewcommand{\mse@headofmse}{#1}
-}
-
-\newcommand{\mse@location}{\@empty}
-\newcommand{\location}[1]{
-   \renewcommand{\mse@location}{#1}
-}
-
-\newcommand\mse@advisor{\@empty}
-\newcommand{\advisor}[1]{
-   \renewcommand{\mse@advisor}{#1}
-}
+% add glossaries to toc
+\glstoctrue
 
 % clear a double page for a new chapter - when there isn't any content in a page, this
 % would automaticly clear headers
 \let\origdoublepage\cleardoublepage
 \newcommand{\clearemptydoublepage}{
-   \clearpage
-   {\pagestyle{empty}\origdoublepage}
+  \clearpage
+  {\pagestyle{empty}\origdoublepage}
 }
 
 % table of contents helper
 % force toc page style -- http://tex.stackexchange.com/questions/5787/table-of-contents-with-page-style-empty
 \addtocontents{toc}{\protect\thispagestyle{fancy}}
 \newcommand{\inserttoc}{
-   \setcounter{tocdepth}{2}
-   \tableofcontents
-   \clearemptydoublepage
+  % backup parskip set by user
+  \let\beforetocparskip\parskip
+  \setlength{\parskip}{0pt plus .1pt}
+
+  \setcounter{tocdepth}{2}
+  \tableofcontents
+  \clearemptydoublepage
+  
+  % restore parskip
+  \setlength{\parskip}{\beforetocparskip}
 }
 
 % list of figure helper
 \newcommand{\insertlof}{
-   \newpage
-   \phantomsection
-   \addcontentsline{toc}{chapter}{\listfigurename}
-   \listoffigures\thispagestyle{fancy}
+  \newpage
+  \phantomsection
+  \addcontentsline{toc}{chapter}{\listfigurename}
+  \listoffigures\thispagestyle{fancy}
 }
 
 % list of table helper
 \newcommand{\insertlot}{
-   \newpage
-   \phantomsection
-   \addcontentsline{toc}{chapter}{\listtablename}
-   \listoftables\thispagestyle{fancy}
+  \newpage
+  \phantomsection
+  \addcontentsline{toc}{chapter}{\listtablename}
+  \listoftables\thispagestyle{fancy}
 }
 
 % list of listening helper
 \newcommand{\insertlol}{
-   \newpage
-   \phantomsection
-   \addcontentsline{toc}{chapter}{\lstlistlistingname}
-   \lstlistoflistings\thispagestyle{fancy}
+  \newpage
+  \phantomsection
+  \addcontentsline{toc}{chapter}{\lstlistlistingname}
+  \lstlistoflistings\thispagestyle{fancy}
 }
 
 % bibliography helper
 \newcommand{\insertbibliography}{
-   \nocite{*}
-   \newpage
-   \phantomsection
-   \printbibliography[heading=bibintoc]
-   \thispagestyle{fancy}
+  %\nocite{*} % include no-cited bib entry in biblio
+  \newpage
+  \phantomsection
+  \begingroup
+  \raggedright
+  \sloppy
+  \printbibliography[heading=bibintoc]
+  \endgroup
+  \thispagestyle{fancy}
 }
+
+
+% glossaries helper
+\newcommand{\insertglossaries}{
+  \newpage
+  \phantomsection
+  % \glsaddall % if we want all entries in glossary
+  \printglossary\thispagestyle{fancy}
+}
+
 
 % More Package Setup #######################################################
 
@@ -172,124 +187,51 @@
 \let\Chapter\chapter
 \def\chapter{\addtocontents{lol}{\protect\addvspace{10pt}}\Chapter}
 
+% cref for listings
+\crefname{lstlisting}{listing}{listings}
+\Crefname{lstlisting}{Listing}{Listings}
+
 % proper header height
 \setlength{\headheight}{15pt}
 
+% set custom parskip values
+\setlength{\parindent}{0pt}
+\setlength{\parskip}{2.0ex plus0.5ex minus0.2ex}
+\setlist[itemize]{parsep=0pt}
+\setlist[enumerate]{parsep=0pt}
+
+% no vertical stretch
+\raggedbottom
+
+% generate glossaries
+\makeglossaries
+
+% eliminate space inserted before itemize
+\setlist{nolistsep}
+
 % Title Page ###############################################################
+\input{\mse@option@path/mse-thesis-cover.cls}
+\input{\mse@option@path/mse-thesis-bla.cls}
 
 \AtBeginDocument{
+  \mse@cover
+  
+  \ifmse@option@draftversion
+    \listoftodos
+  \fi
+  
+  \ifmse@option@skipbla \else
+    \mse@bla
+  \fi
 
-   \pagestyle{empty}
-
-   \begin{center}
-      \parbox[c][0.98\textheight][t]{1.0\textwidth}{
-         \begin{center}
-
-         \vspace*{-2cm}
-         \begin{minipage}[c]{0.5\textwidth}
-            \begin{flushleft}
-               \includegraphics[width=200px]{\mse@option@path/gfx/mse.eps}
-            \end{flushleft}
-         \end{minipage}
-         \hfill
-         \begin{minipage}[c]{0.4\textwidth}
-            \begin{flushright}
-               \includegraphics[width=150px]{\mse@option@path/gfx/hesso.eps}
-            \end{flushright}
-         \end{minipage}
-         \vspace*{1.5cm}
-         \ifmse@option@confidential \MakeUppercase{\mse@str@confidential} \fi
-         \vspace*{1.5cm}
-
-         {\large \bf Master of Science HES-SO in Engineering}\\[1.5ex]
-         {\mse@str@major: \mse@major}
-         \vspace{1.5cm}
-
-         {\Huge \bf \@title \par}
-         \vspace{2ex} 
-         {\large \mse@type}
-         \vspace{0.75cm} 
-
-         \if\mse@location\@empty \else
-            \begin{minipage}[c]{0.6\textwidth}
-               \centering \mse@str@supportedby \emph{\mse@location}
-            \end{minipage}\@empty
-         \fi
-         \vspace{2cm}
-
-         {\large \mse@author}\\
-         \mse@contact
-         \vspace{2.5cm} 
-
-         \begin{minipage}[t]{0.45\textwidth}
-            \begin{flushleft}
-               {\bf \mse@str@professor}\\
-               \vspace{0.5em}
-               \mse@professor\\
-               \vspace{1em}
-               \if\mse@supervisor\@empty \else
-               {\bf \mse@str@supervisor}\\
-               \vspace{0.5em}
-               \mse@supervisor
-               \fi
-            \end{flushleft}
-         \end{minipage}
-         \hfill
-         \begin{minipage}[t]{0.45\textwidth}
-            \begin{flushright}
-               {\bf Expert}\\
-               \vspace{0.5em}
-               \mse@expert
-            \end{flushright}
-         \end{minipage}
-
-         \vfill
-         {HES-SO//Master, \@date, \mse@version}
-
-         \end{center}
-      }
-   \end{center}  
-   \cleardoublepage
-
-   \ifmse@option@skipbla \else
-
-      \pagestyle{empty}
-
-      \begin{center}
-         \parbox[c][0.98\textheight][t]{1.0\textwidth}{
-            \begin{center}
-
-               \mse@str@proposedby\\[2ex]
-               \mse@proposedby
-               \vspace{2.5cm} 
-
-               \begin{minipage}[t]{0.49\textwidth}
-                  \begin{flushleft}
-                     {\bf \mse@str@advisor}\\
-                     \mse@advisor\\
-                  \end{flushleft}
-               \end{minipage}
-               \hfill
-               \begin{minipage}[t]{0.49\textwidth}
-                  \begin{flushright}
-                     {\bf \mse@str@headofmse}\\
-                     \mse@headofmse\\
-                  \end{flushright}
-               \end{minipage}
-
-            \end{center}
-         }
-      \end{center}
-      \cleardoublepage
-
-   \fi
-
-   \pagestyle{fancy}
-   \fancyfoot{}
-   \fancyfoot[LE,RO]{\thepage}
-   \fancyfoot[LO]{\mse@author\ --- \@title}
-   \renewcommand{\headrulewidth}{1.0pt}
-   \renewcommand{\footrulewidth}{0.4pt}
-}
+  \pagestyle{fancy}
+  %avoid section title in header
+  \fancyhead[LE,RO]{}
+  \fancyfoot{}
+  \fancyfoot[LE,RO]{\thepage}
+  \fancyfoot[LO]{\mse@author} %\ --- \@title}
+  \renewcommand{\headrulewidth}{0.4pt}
+  \renewcommand{\footrulewidth}{0.4pt}
 
 \endinput
+}

@@ -7,7 +7,7 @@
 \newcommand{\mse@str@supportedby}{Supported by}
 \newcommand{\mse@str@professor}{Professor}
 \newcommand{\mse@str@proposedby}{Accepted by HES-SO//Master (Switzerland, Lausanne) on a proposal from}
-\newcommand{\mse@str@supervisor}{Supervisor}
+\newcommand{\mse@str@orderer}{Orderer}
 \newcommand{\mse@str@advisor}{Advisor}
 \newcommand{\mse@str@headofmse}{Head of MSE}
 \newcommand{\mse@str@chapter}{Chapter}
@@ -15,3 +15,4 @@
 \newcommand{\mse@str@figure}{Figure}
 \newcommand{\mse@str@table}{Table}
 \newcommand{\mse@str@listing}{Listing}
+\renewcommand{\lstlistlistingname}{List of Listings}
